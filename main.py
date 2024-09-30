@@ -53,31 +53,45 @@ def handle_ping_queries(db_conn, date_str, ping_option):
     cursor = db_conn.cursor()
     table_name = f"ping_{date_str}"
 
-    # Query to get all ping records (excluding timeouts for numeric operations)
-    select_query = f"SELECT latency FROM {table_name} WHERE latency != 'Request timeout'"
-    cursor.execute(select_query)
-    rows = cursor.fetchall()
+    if ping_option == "getAll":
+        # Query to get all records, including timeouts
+        select_query = f"SELECT timestamp, latency FROM {table_name}"
+        cursor.execute(select_query)
+        rows = cursor.fetchall()
 
-    if not rows:
-        print(f"No data found in table {table_name}.")
-        return
+        if not rows:
+            print(f"No data found in table {table_name}.")
+            return
 
-    pings = [int(row[0].replace('ms', '')) for row in rows]  # Convert to integer list
-
-    if ping_option == "max":
-        print(f"Max ping: {max(pings)}ms")
-    elif ping_option == "low":
-        print(f"Lowest ping: {min(pings)}ms")
-    elif ping_option == "medium":
-        average = sum(pings) / len(pings) if pings else 0
-        print(f"Average ping: {average:.2f}ms")
-    elif ping_option == "timeout":
-        # Query for timeouts count
-        cursor.execute(f"SELECT COUNT(*) FROM {table_name} WHERE latency = 'Request timeout'")
-        timeout_count = cursor.fetchone()[0]
-        print(f"Total timeouts: {timeout_count}")
+        print(f"All ping records for {date_str}:")
+        for row in rows:
+            print(f"Timestamp: {row[0]}, Latency: {row[1]}")
     else:
-        print("Invalid ping option.")
+        # Handle other ping options (max, low, medium, timeout)
+        select_query = f"SELECT latency FROM {table_name} WHERE latency != 'Request timeout'"
+        cursor.execute(select_query)
+        rows = cursor.fetchall()
+
+        if not rows:
+            print(f"No data found in table {table_name}.")
+            return
+
+        pings = [int(row[0].replace('ms', '')) for row in rows]  # Convert to integer list
+
+        if ping_option == "max":
+            print(f"Max ping: {max(pings)}ms")
+        elif ping_option == "low":
+            print(f"Lowest ping: {min(pings)}ms")
+        elif ping_option == "medium":
+            average = sum(pings) / len(pings) if pings else 0
+            print(f"Average ping: {average:.2f}ms")
+        elif ping_option == "timeout":
+            # Query for timeouts count
+            cursor.execute(f"SELECT COUNT(*) FROM {table_name} WHERE latency = 'Request timeout'")
+            timeout_count = cursor.fetchone()[0]
+            print(f"Total timeouts: {timeout_count}")
+        else:
+            print("Invalid ping option.")
 
 # Function to print usage information
 def print_usage():
@@ -89,6 +103,7 @@ def print_usage():
                             - low: Returns the lowest ping value.
                             - medium: Returns the average ping value.
                             - timeout: Returns the total count of timeouts.
+                            - getAll: Returns all the ping records, including timeouts (for debugging purposes).
     --usage                : Display this usage guide.
     """
     print(usage_info)
@@ -97,7 +112,7 @@ def main():
     # Set up argument parser
     parser = argparse.ArgumentParser(description="Ping Google and store the data.")
     parser.add_argument('--date', type=str, help="Specify the date in DDMMYYYY format to look for in the database.")
-    parser.add_argument('--ping', type=str, help="Specify what type of ping data to retrieve: [max, low, medium, timeout].")
+    parser.add_argument('--ping', type=str, help="Specify what type of ping data to retrieve: [max, low, medium, timeout, getAll].")
     parser.add_argument('--usage', action='store_true', help="Display usage information.")
 
     args = parser.parse_args()
@@ -134,6 +149,7 @@ def main():
                     output = f"[{current_time}] {latency}"
                 elif "Request timed out" in line:
                     output = f"[{current_time}] Request timeout."
+                    latency = "Request timeout"
                 else:
                     continue  # Skip lines that are not needed
                 
@@ -141,7 +157,7 @@ def main():
                 log_data.append(output + '\n')  # Store the output to log
 
                 # Store the timestamp and latency in ping_data for batch insert
-                ping_data.append((current_time, latency if "latency" in locals() else "Request timeout"))
+                ping_data.append((current_time, latency))
                 ping_count += 1
 
                 # Insert pings in batches of 10
