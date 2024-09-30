@@ -67,7 +67,7 @@ def handle_ping_queries(db_conn, date_str, ping_option):
         for row in rows:
             print(f"Timestamp: {row[0]}, Latency: {row[1]}")
     else:
-        # Handle other ping options (max, low, medium, timeout)
+        # Handle other ping options (max, min, medium, timeout)
         select_query = f"SELECT latency FROM {table_name} WHERE latency != 'Request timeout'"
         cursor.execute(select_query)
         rows = cursor.fetchall()
@@ -80,8 +80,8 @@ def handle_ping_queries(db_conn, date_str, ping_option):
 
         if ping_option == "max":
             print(f"Max ping: {max(pings)}ms")
-        elif ping_option == "low":
-            print(f"Lowest ping: {min(pings)}ms")
+        elif ping_option == "min":
+            print(f"Min ping: {min(pings)}ms")
         elif ping_option == "medium":
             average = sum(pings) / len(pings) if pings else 0
             print(f"Average ping: {average:.2f}ms")
@@ -100,7 +100,7 @@ def print_usage():
     --date="DDMMYYYY"      : Specify the date for querying the ping data from the corresponding table (e.g., --date=30092024).
     --ping=[option]        : Choose the ping data to retrieve from the selected date:
                             - max: Returns the highest ping value.
-                            - low: Returns the lowest ping value.
+                            - min: Returns the min ping value.
                             - medium: Returns the average ping value.
                             - timeout: Returns the total count of timeouts.
                             - getAll: Returns all the ping records, including timeouts (for debugging purposes).
@@ -112,7 +112,7 @@ def main():
     # Set up argument parser
     parser = argparse.ArgumentParser(description="Ping Google and store the data.")
     parser.add_argument('--date', type=str, help="Specify the date in DDMMYYYY format to look for in the database.")
-    parser.add_argument('--ping', type=str, help="Specify what type of ping data to retrieve: [max, low, medium, timeout, getAll].")
+    parser.add_argument('--ping', type=str, help="Specify what type of ping data to retrieve: [max, min, medium, timeout, getAll].")
     parser.add_argument('--usage', action='store_true', help="Display usage information.")
 
     args = parser.parse_args()
