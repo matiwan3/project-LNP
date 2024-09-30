@@ -1,4 +1,4 @@
-# Ping Logger Project
+# Local Network Performance Logger
 
 This project is a simple command-line tool that pings Google's servers, logs the results to a database, and allows you to query the logged data. It uses SQLite for data storage and provides various options to retrieve ping statistics.
 
@@ -73,3 +73,12 @@ This command displays the usage instructions.
 - ping_google: Executes the ping command to Google.
 - handle_ping_queries: Processes the user queries based on provided flags.
 - print_usage: Displays usage instructions.
+
+## Example Log
+- running the script  
+![image](https://github.com/user-attachments/assets/7a00c7ef-d42f-4145-8c4e-4298d9bf971f)  
+
+
+- getting the max | low | medium ping values for certain date  
+![image](https://github.com/user-attachments/assets/47336ee1-6ceb-4241-88f7-187696ee4f0f)
+
