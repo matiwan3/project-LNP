@@ -79,6 +79,7 @@ This command displays the usage instructions.
 ![image](https://github.com/user-attachments/assets/7a00c7ef-d42f-4145-8c4e-4298d9bf971f)  
 
 
-- getting the max | low | medium ping values for certain date  
-![image](https://github.com/user-attachments/assets/47336ee1-6ceb-4241-88f7-187696ee4f0f)
+- getting the min | max | avg ping values for certain date  
+![image](https://github.com/user-attachments/assets/522629cd-983d-40c4-96b4-126a52eefbdc)
+
 
