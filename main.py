@@ -67,7 +67,7 @@ def handle_ping_queries(db_conn, date_str, ping_option):
         for row in rows:
             print(f"Timestamp: {row[0]}, Latency: {row[1]}")
     else:
-        # Handle other ping options (max, min, medium, timeout)
+        # Handle other ping options (max, min, avg, timeout)
         select_query = f"SELECT latency FROM {table_name} WHERE latency != 'Request timeout'"
         cursor.execute(select_query)
         rows = cursor.fetchall()
@@ -82,7 +82,7 @@ def handle_ping_queries(db_conn, date_str, ping_option):
             print(f"Max ping: {max(pings)}ms")
         elif ping_option == "min":
             print(f"Min ping: {min(pings)}ms")
-        elif ping_option == "medium":
+        elif ping_option == "avg":
             average = sum(pings) / len(pings) if pings else 0
             print(f"Average ping: {average:.2f}ms")
         elif ping_option == "timeout":
@@ -101,7 +101,7 @@ def print_usage():
     --ping=[option]        : Choose the ping data to retrieve from the selected date:
                             - max: Returns the highest ping value.
                             - min: Returns the min ping value.
-                            - medium: Returns the average ping value.
+                            - avg: Returns the average ping value.
                             - timeout: Returns the total count of timeouts.
                             - getAll: Returns all the ping records, including timeouts (for debugging purposes).
     --usage                : Display this usage guide.
@@ -112,7 +112,7 @@ def main():
     # Set up argument parser
     parser = argparse.ArgumentParser(description="Ping Google and store the data.")
     parser.add_argument('--date', type=str, help="Specify the date in DDMMYYYY format to look for in the database.")
-    parser.add_argument('--ping', type=str, help="Specify what type of ping data to retrieve: [max, min, medium, timeout, getAll].")
+    parser.add_argument('--ping', type=str, help="Specify what type of ping data to retrieve: [max, min, avg, timeout, getAll].")
     parser.add_argument('--usage', action='store_true', help="Display usage information.")
 
     args = parser.parse_args()
