@@ -1,4 +1,4 @@
-# Ping Logger Project
+# Local Network Performance Logger
 
 This project is a simple command-line tool that pings Google's servers, logs the results to a database, and allows you to query the logged data. It uses SQLite for data storage and provides various options to retrieve ping statistics.
 
