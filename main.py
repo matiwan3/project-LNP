@@ -24,6 +24,16 @@ def create_table_if_not_exists(db_conn):
     '''
     cursor.execute(create_table_query)
     db_conn.commit()
+    
+# Function to retrieve all dates (table names) from the database
+def get_all_dates(db_conn):
+    cursor = db_conn.cursor()
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+    tables = cursor.fetchall()
+    
+    # Filter out tables that are not following the ping_date format
+    date_tables = [table[0] for table in tables if table[0].startswith("ping_")]
+    return date_tables
 
 # Function to insert batch of pings into the database
 def insert_pings_to_db(db_conn, ping_data):
@@ -49,9 +59,42 @@ def ping_google():
     return process
 
 # Function to handle the ping data queries based on --ping flag
+# Function to handle the ping data queries based on --ping flag
 def handle_ping_queries(db_conn, date_str, ping_option):
     cursor = db_conn.cursor()
-    table_name = f"ping_{date_str}"
+
+    if date_str == "all":
+        # Get all tables (dates)
+        date_tables = get_all_dates(db_conn)
+
+        if not date_tables:
+            print("No data available in the database.")
+            return
+
+        for table_name in date_tables:
+            print(f"\nData for date: {table_name[5:]}")  # Strip 'ping_' from table name to show date
+
+            if ping_option == "all":
+                print(f"Fetching min, max, avg, and timeout for date: {table_name[5:]}")
+
+                # Fetch min, max, avg and timeout
+                handle_single_date_queries(db_conn, table_name, "min")
+                handle_single_date_queries(db_conn, table_name, "max")
+                handle_single_date_queries(db_conn, table_name, "avg")
+                handle_single_date_queries(db_conn, table_name, "timeout")
+
+            else:
+                # Fetch specific ping data for all dates (e.g., min, max, avg, timeout)
+                handle_single_date_queries(db_conn, table_name, ping_option)
+
+    else:
+        # If a specific date is provided
+        table_name = f"ping_{date_str}"
+        handle_single_date_queries(db_conn, table_name, ping_option)
+
+# Function to query and print ping data for a single date (table)
+def handle_single_date_queries(db_conn, table_name, ping_option):
+    cursor = db_conn.cursor()
 
     if ping_option == "getAll":
         # Query to get all records, including timeouts
@@ -63,7 +106,7 @@ def handle_ping_queries(db_conn, date_str, ping_option):
             print(f"No data found in table {table_name}.")
             return
 
-        print(f"All ping records for {date_str}:")
+        print(f"All ping records for {table_name[5:]}:")
         for row in rows:
             print(f"Timestamp: {row[0]}, Latency: {row[1]}")
     else:
@@ -92,7 +135,7 @@ def handle_ping_queries(db_conn, date_str, ping_option):
             print(f"Total timeouts: {timeout_count}")
         else:
             print("Invalid ping option.")
-
+            
 # Function to print usage information
 def print_usage():
     usage_info = """
@@ -108,11 +151,12 @@ def print_usage():
     """
     print(usage_info)
 
+# Updated main function to handle "all" flag for --date and --ping
 def main():
     # Set up argument parser
     parser = argparse.ArgumentParser(description="Ping Google and store the data.")
-    parser.add_argument('--date', type=str, help="Specify the date in DDMMYYYY format to look for in the database.")
-    parser.add_argument('--ping', type=str, help="Specify what type of ping data to retrieve: [max, min, avg, timeout, getAll].")
+    parser.add_argument('--date', type=str, help="Specify the date in DDMMYYYY format to look for in the database, or 'all' to query all dates.")
+    parser.add_argument('--ping', type=str, help="Specify what type of ping data to retrieve: [max, min, avg, timeout, getAll, all].")
     parser.add_argument('--usage', action='store_true', help="Display usage information.")
 
     args = parser.parse_args()
