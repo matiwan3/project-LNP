@@ -79,7 +79,9 @@ This command displays the usage instructions.
 ![image](https://github.com/user-attachments/assets/7a00c7ef-d42f-4145-8c4e-4298d9bf971f)  
 
 
-- getting the min | max | avg ping values for certain date  
-![image](https://github.com/user-attachments/assets/522629cd-983d-40c4-96b4-126a52eefbdc)
+- getting the min | max | avg | timeout ping values for specific date  
+![image](https://github.com/user-attachments/assets/522629cd-983d-40c4-96b4-126a52eefbdc)  
+![image](https://github.com/user-attachments/assets/40d74c5e-d984-472d-9717-32c67c241e1e)
 
-
+- updated flags to allow user to print all dates along with all parameters 
+![image](https://github.com/user-attachments/assets/ffcb69c4-0f45-41c8-b0db-1c388e8f0cc3)
